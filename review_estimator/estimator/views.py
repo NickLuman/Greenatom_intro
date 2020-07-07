@@ -9,7 +9,7 @@ from keras.models import model_from_json
 
 def index(request):
     if request.method == "POST":
-        model_l = load_model('model_ltsm.json', 'model_ltsm.h5')
+        model_l = load_model('model_lstm.json', 'model_lstm.h5')
         model_s = load_model('model_sem.json', 'model_sem.h5')
 
         review = request.POST.get("review")
@@ -23,8 +23,10 @@ def index(request):
         model_l_prediction = model_l.predict(rev_l.reshape(1, 300))[0][0]
         model_s_prediction = model_s.predict(rev_s.reshape(1, 375))[0][0]
 
-        rate = int(str(round((model_l_prediction+model_l_prediction)/2, 2))[2])
-        mood = 'Положительный' if rate > 5 else 'Отрицательный'
+        rate = int(str(round((model_l_prediction+model_s_prediction)/2, 2))[2])
+        mood = 'Положительный' if rate >= 5 else 'Отрицательный'
+
+        rate += 1
 
         return render(request, "evaluation.html", {"rate": rate,
                                                 "mood": mood})
